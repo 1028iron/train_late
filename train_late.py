@@ -64,13 +64,20 @@ with tab1:
             st.write(f"🚆 **{train['train_name']}**")
             st.write(f"📍 区間：{train['section']}")
             st.write(f"🚉 名古屋駅 所定発車時刻：{train['departure_time']}")
+
             delay = int(train["delay_minutes"])
-            if delay > 0:
-                delayed_time = datetime.strptime(train["departure_time"], "%H:%M") + timedelta(minutes=delay)
-                delayed_time_str = delayed_time.strftime("%H:%M")
-                st.markdown(f"<span style='color:red;'>🕒 発車予定時刻：{delayed_time_str}（{delay}分遅れ）</span>", unsafe_allow_html=True)
-            else:
-                st.write("🕒 発車予定時刻：定刻")
+            departure_time_str = train["departure_time"]
+
+            try:
+                base_time = datetime.strptime(departure_time_str, "%H:%M")
+                if delay > 0:
+                    delayed_time = base_time + timedelta(minutes=delay)
+                    delayed_time_str = delayed_time.strftime("%H:%M")
+                    st.markdown(f"<span style='color:red;'>🕒 発車予定時刻：{delayed_time_str}（{delay}分遅れ）</span>", unsafe_allow_html=True)
+                else:
+                    st.write("🕒 発車予定時刻：定刻")
+            except (ValueError, TypeError):
+                st.error(f"⚠️ 時刻形式エラー: {train['train_name']} の所定発車時刻が不正です。")
 
 with tab2:
     st.subheader("新幹線の遅延情報を入力")
